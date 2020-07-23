@@ -5,7 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Linq;
 
-namespace Frontend
+namespace CircuitBreaker
 {
     public class CircuitBreaker<T> where T : new()
     {
@@ -17,30 +17,24 @@ namespace Frontend
         public T Cache { get; set; }
         public List<bool> Checks { get; set; } = new List<bool>();
 
-        private bool IsOnline()
-        {
-            foreach (var check in Checks)
-            {
-                Console.Write(check);
-            }
-
-            if (Checks.TakeLast(3).Any(c => c == false))
-                return false;
-
-            return true;
-        }
+        private bool IsOnline() => Checks.TakeLast(5).All(c => c == true);
 
         public async Task<T> GetData()
         {
             if (IsOnline())
-            {
-                using var client = new System.Net.Http.HttpClient();
-                var request = new System.Net.Http.HttpRequestMessage { RequestUri = new Uri("http://backend/People") };
-                var response = await client.SendAsync(request);
-                Cache = JsonConvert.DeserializeObject<T>(response.Content.ReadAsStringAsync().Result);
-            }
+                Cache = await MakeRequest();
 
             return Cache;
+        }
+
+        private async Task<T> MakeRequest()
+        {
+            using var client = new System.Net.Http.HttpClient();
+            var request = new System.Net.Http.HttpRequestMessage { RequestUri = new Uri("http://backend/People") };
+            var response = await client.SendAsync(request);
+
+            var responseObject = response.Content.ReadAsStringAsync().Result;
+            return JsonConvert.DeserializeObject<T>(responseObject);
         }
 
         private void InitHealthChecks()
@@ -50,13 +44,17 @@ namespace Frontend
             {
                 try
                 {
-                    using var client = new System.Net.Http.HttpClient();
+                    using var client = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(5) };
                     var request = new System.Net.Http.HttpRequestMessage { RequestUri = new Uri("http://backend/health") };
                     var response = await client.SendAsync(request);
-                    Checks.Add(response.StatusCode == HttpStatusCode.OK);
+                    var success = response.StatusCode == HttpStatusCode.OK;
+                    var msg = success ? "backend is online" : "backend is offline";
+                    Console.WriteLine($"{DateTime.Now}: CircuitBreaker - {msg}");
+                    Checks.Add(success);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
+                    Console.WriteLine($"{DateTime.Now}: CircuitBreaker - backend is offline");
                     Checks.Add(false);
                 }
             };

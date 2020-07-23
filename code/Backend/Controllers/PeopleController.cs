@@ -20,17 +20,15 @@ namespace MyWebAPI.Controllers
             new Bratkartoffel() {Name = "Ben" },
             new Bratkartoffel() {Name = "Lukas" },
             new Bratkartoffel() {Name = "Dan" },
-            new Bratkartoffel() {Name = "Manni" },
-            new Bratkartoffel() {Name = "Valentin" },
-            new Bratkartoffel() {Name = "Flo" },
-            new Bratkartoffel() {Name = "Michi" },
-            new Bratkartoffel() {Name = "Pati" },
+            new Bratkartoffel() {Name = "Umberto" },
+
         };
 
         [HttpGet]
         public Bratkartoffel GetPerson()
         {
-            //Thread.Sleep(5000);
+            Thread.Sleep(5000);
+
             var rand = new Random();
             return people[rand.Next(1, people.Count - 1)];
         }

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace WebFrontEnd.Pages
+namespace Frontend.Pages
 {
     public class IndexModel : PageModel
     {

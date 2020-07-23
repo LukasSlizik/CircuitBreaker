@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
-using Frontend;
+using CircuitBreaker;
 using Models;
 
-namespace WebFrontEnd
+namespace Frontend
 {
     public class Client
     {
