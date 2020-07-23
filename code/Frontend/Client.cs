@@ -13,7 +13,7 @@ namespace Frontend
             _cb = new CircuitBreaker<Bratkartoffel>();
         }
 
-        public async Task<Bratkartoffel> GetData()
+        public async Task<ResponseObject<Bratkartoffel>> GetData()
         {
             return await _cb.GetData();
         }

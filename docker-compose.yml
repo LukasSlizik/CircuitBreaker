@@ -3,13 +3,17 @@ version: '3.4'
 services:
   backend:
     image: ${DOCKER_REGISTRY-}backend
+    container_name: backend
     build:
       context: .
       dockerfile: code/Backend/Dockerfile
 
   frontend:
     image: ${DOCKER_REGISTRY-}frontend
+    container_name: frontend
+    ports:
+      - "35666:80"
+      - "35777:443"
     build:
       context: .
       dockerfile: code/Frontend/Dockerfile
-

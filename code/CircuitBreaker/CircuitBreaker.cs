@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Net;
 using System.Threading.Tasks;
 using System.Linq;
@@ -14,15 +15,23 @@ namespace CircuitBreaker
             InitHealthChecks();
         }
 
-        public T Cache { get; set; }
-        public List<bool> Checks { get; set; } = new List<bool>();
+        public ResponseObject<T> Cache { get; set; }
+        public List<bool> HealthChecks { get; set; } = new List<bool>();
 
-        private bool IsOnline() => Checks.TakeLast(5).All(c => c == true);
+        private bool IsOnline() => HealthChecks.TakeLast(5).All(c => c == true);
 
-        public async Task<T> GetData()
+        public async Task<ResponseObject<T>> GetData()
         {
+            foreach(var check in HealthChecks)
+                Console.WriteLine(check);
+
             if (IsOnline())
-                Cache = await MakeRequest();
+            {
+                Console.WriteLine("IsOnline");
+                Cache = new ResponseObject<T>(await MakeRequest());
+            }
+
+                
 
             return Cache;
         }
@@ -50,15 +59,26 @@ namespace CircuitBreaker
                     var success = response.StatusCode == HttpStatusCode.OK;
                     var msg = success ? "backend is online" : "backend is offline";
                     Console.WriteLine($"{DateTime.Now}: CircuitBreaker - {msg}");
-                    Checks.Add(success);
+                    HealthChecks.Add(success);
                 }
                 catch (Exception)
                 {
                     Console.WriteLine($"{DateTime.Now}: CircuitBreaker - backend is offline");
-                    Checks.Add(false);
+                    HealthChecks.Add(false);
                 }
             };
             timer.Enabled = true;
         }
+    }
+
+    public class ResponseObject<T>
+    {
+        public ResponseObject(T cache)
+        {
+            Cache = cache;
+            Timestamp = DateTime.Now;
+        }
+        public DateTime Timestamp { get; set; }
+        public T Cache { get; set; }
     }
 }

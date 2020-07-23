@@ -27,10 +27,8 @@ namespace MyWebAPI.Controllers
         [HttpGet]
         public Bratkartoffel GetPerson()
         {
-            Thread.Sleep(5000);
-
             var rand = new Random();
-            return people[rand.Next(1, people.Count - 1)];
+            return people[rand.Next(0, people.Count)];
         }
     }
 }

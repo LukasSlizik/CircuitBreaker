@@ -15,8 +15,9 @@ namespace Frontend.Pages
 
         public async Task OnGet()
         {
-            var person = await _client.GetData();
-            ViewData["Message"] = $"{person.Name}";
+            var response = await _client.GetData();
+            ViewData["Message"] = $"{response.Cache.Name}";
+            ViewData["Timestamp"] = $"{response.Timestamp}";
         }
     }
 }
