@@ -22,16 +22,8 @@ namespace CircuitBreaker
 
         public async Task<ResponseObject<T>> GetData()
         {
-            foreach(var check in HealthChecks)
-                Console.WriteLine(check);
-
             if (IsOnline())
-            {
-                Console.WriteLine("IsOnline");
                 Cache = new ResponseObject<T>(await MakeRequest());
-            }
-
-                
 
             return Cache;
         }
